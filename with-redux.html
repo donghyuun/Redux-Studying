@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/redux/4.1.0/redux.min.js">
+
+	</script>
+</head>
+
+<body>
+	<style>
+		.container {
+			border: 5px solid black;
+			padding: 10px;
+		}
+	</style>
+	<div id="red"></div>
+	<div id="blue"></div>
+	<div id="green"></div>
+	<script>
+		function reducer(state, action){
+      console.log(state, action);
+      //store를 처음 만들때 state값의 초기값을 지정해줘야 한다
+      if(state === undefined){
+        return {color: 'yellow'}//return문으로 초기값을 지정해준다
+      }
+      var newState;
+      if(action.type === 'CHANGE_COLOR'){
+        newState = Object.assign({}, state, {color:action.color});//state가 복제되어 {}에 덮어쓰여지고 "그 후" {color:'red'}가 복제되어 앞의 {}객체에 덮여쓰여진다
+        console.log(action.type,action,state,newState);
+        //application의 상태가 궁금하면 reducer를 이용하면 된다. 일목요연하게 볼 수 있다.
+      }
+      return newState;//새로운 state값 리턴, 원본(위 예시에선 state)변경X
+    }
+    var store = Redux.createStore(reducer,
+    window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+    );//전역변수에 저장됨으로써 application어디서든지 실행할 수 있다
+		function red(){
+      var state = store.getState();//getState를 통해 state를 가져옴
+      document.querySelector('#red').innerHTML = `
+        <div class="container" id="component_red" style="background-color:${state.color}">
+            <h1>red</h1>
+            <input type="button" value="fire" onclick="
+            store.dispatch({type:'CHANGE_COLOR', color:'red'});
+            ">
+        </div>
+      `;
+      //state값을 변경하기 위해 action을 dispatch에게 주면 dispatch가 reducer을 호출하고 현재(기존의) state과 action을 인자로 주고 최종적으로 reducer가 변경된 state값을 리턴한다
+      //store의 state값 내부의 color가 red로 바뀐다
+    }
+    store.subscribe(red);//state값이 바뀔때마다(= reducer함수가 새로운 state값을 리턴할때마다) subscribe에 구독된 red함수가 호출된다
+    red();
+
+    function blue(){
+      var state = store.getState();//getState를 통해 state를 가져옴
+      document.querySelector('#blue').innerHTML = `
+        <div class="container" id="component_blue" style="background-color:${state.color}">
+            <h1>blue</h1>
+            <input type="button" value="fire" onclick="
+            store.dispatch({type:'CHANGE_COLOR', color:'blue'});
+            ">
+        </div>
+      `;
+    }
+    store.subscribe(blue);
+    blue();
+    //다른 부품들을 전혀 몰라도 된다, 자신의 일에만 집중하면 됨 => pure code
+
+    function green(){
+      var state = store.getState();//getState를 통해 state를 가져옴
+      document.querySelector('#green').innerHTML = `
+        <div class="container" id="component_green" style="background-color:${state.color}">
+            <h1>green</h1>
+            <input type="button" value="fire" onclick="
+            store.dispatch({type:'CHANGE_COLOR', color:'green'});
+            ">
+        </div>
+      `;
+    }
+    store.subscribe(green);
+    green();
+	</script>
+</body>
+
+</html>
